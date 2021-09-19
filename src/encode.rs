@@ -1,13 +1,14 @@
 use crate::constants;
 use crate::value::Value;
+use std::vec::Vec;
 
 pub mod json;
 
 pub fn encode(val: Value) -> &'static [u8] {
   match val {
-    Value::Null => return vec![constants::NULL],
-    Value::Bit(b) => return vec![constants::BIT, if b { 1 } else { 0 }],
-    Value::Boolean(b) => return vec![constants::BOOLEAN, if b { 1 } else { 0 }],
+    Value::Null => return &[constants::NULL],
+    Value::Bit(b) => return &[constants::BIT, if b { 1 } else { 0 }],
+    Value::Boolean(b) => return &[constants::BOOLEAN, if b { 1 } else { 0 }],
     Value::Int32(i) => {
       let mut value = vec![constants::INT_32];
 
@@ -15,7 +16,7 @@ pub fn encode(val: Value) -> &'static [u8] {
         value.push(val);
       }
 
-      return value;
+      return Vec::as_slice(&value);
     }
     Value::Float(i) => {
       let mut value = vec![constants::FLOAT];
@@ -24,7 +25,7 @@ pub fn encode(val: Value) -> &'static [u8] {
         value.push(val);
       }
 
-      return value;
+      return Vec::as_slice(&value);
     }
     Value::Double(i) => {
       let mut value = vec![constants::DOUBLE];
@@ -33,7 +34,7 @@ pub fn encode(val: Value) -> &'static [u8] {
         value.push(val);
       }
 
-      return value;
+      return Vec::as_slice(&value);
     }
     Value::String(s) => {
       let mut value = vec![constants::STRING];
@@ -45,7 +46,7 @@ pub fn encode(val: Value) -> &'static [u8] {
       }
 
       value.push(constants::STRING);
-      return value;
+      return Vec::as_slice(&value);
     }
     Value::Array(a) => {
       let mut value = vec![constants::ARRAY_START];
@@ -57,7 +58,7 @@ pub fn encode(val: Value) -> &'static [u8] {
 
       value.push(constants::ARRAY_END);
 
-      return value;
+      return Vec::as_slice(&value);
     }
     Value::Object(o) => {
       let mut value = vec![constants::DICTIONARY_START];
@@ -68,17 +69,17 @@ pub fn encode(val: Value) -> &'static [u8] {
 
         let val = match o.get(key) {
           Some(e) => encode(e.clone()),
-          None => vec![constants::NULL],
+          None => &[constants::NULL],
         };
 
         for byte in val {
-          value.push(byte);
+          value.push(byte.to_owned());
         }
       }
 
       value.push(constants::DICTIONARY_END);
 
-      return value;
+      return &value[..];
     }
     Value::Int64(i) => {
       let mut value = vec![constants::INT_64];
@@ -87,7 +88,7 @@ pub fn encode(val: Value) -> &'static [u8] {
         value.push(val);
       }
 
-      return value;
+      return Vec::as_slice(&value);
     }
     Value::Int16(i) => {
       let mut value = vec![constants::INT_16];
@@ -96,7 +97,7 @@ pub fn encode(val: Value) -> &'static [u8] {
         value.push(val);
       }
 
-      return value;
+      return Vec::as_slice(&value);
     }
     Value::Int8(i) => {
       let mut value = vec![constants::INT_8];
@@ -105,7 +106,7 @@ pub fn encode(val: Value) -> &'static [u8] {
         value.push(val);
       }
 
-      return value;
+      return Vec::as_slice(&value);
     }
   }
 }

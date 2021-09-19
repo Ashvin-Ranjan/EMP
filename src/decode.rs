@@ -1,35 +1,36 @@
 use crate::constants;
+use crate::errors::DecodeError;
 use crate::value::Value;
-use std::convert::TryInto;
 use std::collections::HashMap;
+use std::convert::TryInto;
 
 pub mod json;
 
-fn decode_bit(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), String> {
+fn decode_bit(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
   if bytes[0] != constants::BIT {
     return Ok((None, &bytes[1..]));
   }
 
   if bytes.len() == 1 {
-    return Err("Expected Byte, got end of file".to_owned());
+    return Err(DecodeError::EOFError);
   }
 
   return Ok((Some(Value::Bit(bytes[1] == 1)), &bytes[2..]));
 }
 
-fn decode_bool(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), String> {
+fn decode_bool(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
   if bytes[0] != constants::BOOLEAN {
     return Ok((None, &bytes[1..]));
   }
 
   if bytes.len() == 1 {
-    return Err("Expected boolean, got end of file".to_owned());
+    return Err(DecodeError::EOFError);
   }
 
   return Ok((Some(Value::Boolean(bytes[1] == 1)), &bytes[2..]));
 }
 
-fn decode_array(_b: &[u8]) -> Result<(Option<Value>, &[u8]), String> {
+fn decode_array(_b: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
   let mut emp_array: Vec<Value> = vec![];
 
   let mut bytes = _b;
@@ -42,7 +43,7 @@ fn decode_array(_b: &[u8]) -> Result<(Option<Value>, &[u8]), String> {
 
   while bytes.len() != 0 {
     if bytes[0] == constants::ARRAY_END {
-      return Ok((Some(Value::Array(emp_array)), &bytes[1..]))
+      return Ok((Some(Value::Array(emp_array)), &bytes[1..]));
     }
 
     let val_tokens = decode(bytes);
@@ -56,10 +57,10 @@ fn decode_array(_b: &[u8]) -> Result<(Option<Value>, &[u8]), String> {
     }
   }
 
-  return Err("Expected Array to end before end of file".to_owned());
+  return Err(DecodeError::EOFError);
 }
 
-fn decode_string(_b: &[u8]) -> Result<(Option<Value>, &[u8]), String> {
+fn decode_string(_b: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
   let mut emp_string: Vec<u8> = vec![];
 
   let mut bytes = _b;
@@ -74,16 +75,16 @@ fn decode_string(_b: &[u8]) -> Result<(Option<Value>, &[u8]), String> {
     if bytes[0] == constants::STRING {
       let s = match std::str::from_utf8(&emp_string) {
         Ok(s) => s,
-        Err(e) => return Err(format!("Unable to decode string bytes {}", e)),
+        Err(e) => return Err(DecodeError::StringDecodeError(e)),
       };
-      return Ok((Some(Value::String(s.to_owned())), &bytes[1..]))
+      return Ok((Some(Value::String(s.to_owned())), &bytes[1..]));
     }
 
     emp_string.push(bytes[0]);
     bytes = &bytes[1..];
   }
 
-  return Err("Expected String to end before end of file".to_owned());
+  return Err(DecodeError::EOFError);
 }
 
 fn decode_null(bytes: &[u8]) -> (Option<Value>, &[u8]) {
@@ -94,20 +95,25 @@ fn decode_null(bytes: &[u8]) -> (Option<Value>, &[u8]) {
   return (Some(Value::Null), &bytes[1..]);
 }
 
-fn decode_int32(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), String> {
+fn decode_int32(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
   if bytes[0] != constants::INT_32 {
     return Ok((None, &bytes[1..]));
   }
 
   if bytes.len() < 5 {
-    return Err("Expected Int 32, got end of file".to_owned());
+    return Err(DecodeError::EOFError);
   }
 
-  return Ok((Some(Value::Int32(u32::from_be_bytes(bytes[1..5].try_into().expect("Slice with incorrect length")))), &bytes[5..]));
+  return Ok((
+    Some(Value::Int32(u32::from_be_bytes(
+      bytes[1..5].try_into().expect("Slice with incorrect length"),
+    ))),
+    &bytes[5..],
+  ));
 }
 
-fn decode_object(_b: &[u8]) -> Result<(Option<Value>, &[u8]), String> {
-  let mut emp_object:HashMap<String, Value> = HashMap::new();
+fn decode_object(_b: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
+  let mut emp_object: HashMap<String, Value> = HashMap::new();
 
   let mut bytes = _b;
 
@@ -117,14 +123,14 @@ fn decode_object(_b: &[u8]) -> Result<(Option<Value>, &[u8]), String> {
 
   bytes = &bytes[1..];
 
-  let mut current_key:Option<String> = None;
+  let mut current_key: Option<String> = None;
 
   while bytes.len() != 0 {
     if bytes[0] == constants::DICTIONARY_END {
-      if current_key != None {
-        return Err("Unmatched key".to_owned());
+      if let Some(k) = current_key {
+        return Err(DecodeError::UnmatchedKey(k));
       }
-      return Ok((Some(Value::Object(emp_object)), &bytes[1..]))
+      return Ok((Some(Value::Object(emp_object)), &bytes[1..]));
     }
 
     let val_tokens = decode(bytes);
@@ -146,70 +152,93 @@ fn decode_object(_b: &[u8]) -> Result<(Option<Value>, &[u8]), String> {
     }
   }
 
-  return Err("Expected Array to end before end of file".to_owned());
+  return Err(DecodeError::EOFError);
 }
 
-fn decode_float(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), String> {
+fn decode_float(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
   if bytes[0] != constants::FLOAT {
     return Ok((None, &bytes[1..]));
   }
 
   if bytes.len() < 5 {
-    return Err("Expected float, got end of file".to_owned());
+    return Err(DecodeError::EOFError);
   }
 
-  return Ok((Some(Value::Float(f32::from_be_bytes(bytes[1..5].try_into().expect("Slice with incorrect length")))), &bytes[5..]));
+  return Ok((
+    Some(Value::Float(f32::from_be_bytes(
+      bytes[1..5].try_into().expect("Slice with incorrect length"),
+    ))),
+    &bytes[5..],
+  ));
 }
 
-fn decode_double(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), String> {
+fn decode_double(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
   if bytes[0] != constants::DOUBLE {
     return Ok((None, &bytes[1..]));
   }
 
   if bytes.len() < 9 {
-    return Err("Expected Double, got end of file".to_owned());
+    return Err(DecodeError::EOFError);
   }
 
-  return Ok((Some(Value::Double(f64::from_be_bytes(bytes[1..9].try_into().expect("Slice with incorrect length")))), &bytes[9..]));
+  return Ok((
+    Some(Value::Double(f64::from_be_bytes(
+      bytes[1..9].try_into().expect("Slice with incorrect length"),
+    ))),
+    &bytes[9..],
+  ));
 }
 
-fn decode_int64(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), String> {
+fn decode_int64(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
   if bytes[0] != constants::INT_64 {
     return Ok((None, &bytes[1..]));
   }
 
   if bytes.len() < 9 {
-    return Err("Expected Int 64, got end of file".to_owned());
+    return Err(DecodeError::EOFError);
   }
 
-  return Ok((Some(Value::Int64(u64::from_be_bytes(bytes[1..9].try_into().expect("Slice with incorrect length")))), &bytes[9..]));
+  return Ok((
+    Some(Value::Int64(u64::from_be_bytes(
+      bytes[1..9].try_into().expect("Slice with incorrect length"),
+    ))),
+    &bytes[9..],
+  ));
 }
 
-fn decode_int16(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), String> {
+fn decode_int16(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
   if bytes[0] != constants::INT_16 {
     return Ok((None, &bytes[1..]));
   }
 
   if bytes.len() < 3 {
-    return Err("Expected Int 16, got end of file".to_owned());
+    return Err(DecodeError::EOFError);
   }
 
-  return Ok((Some(Value::Int16(u16::from_be_bytes(bytes[1..3].try_into().expect("Slice with incorrect length")))), &bytes[3..]));
+  return Ok((
+    Some(Value::Int16(u16::from_be_bytes(
+      bytes[1..3].try_into().expect("Slice with incorrect length"),
+    ))),
+    &bytes[3..],
+  ));
 }
 
-fn decode_int8(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), String> {
+fn decode_int8(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
   if bytes[0] != constants::INT_8 {
     return Ok((None, &bytes[1..]));
   }
 
   if bytes.len() < 2 {
-    return Err("Expected Int 8, got end of file".to_owned());
+    return Err(DecodeError::EOFError);
   }
 
-  return Ok((Some(Value::Int8(u8::from_be_bytes([bytes[1]]))), &bytes[2..]));
+  return Ok((
+    Some(Value::Int8(u8::from_be_bytes([bytes[1]]))),
+    &bytes[2..],
+  ));
 }
 
-pub fn decode(_b: &[u8]) -> Result<(Value, &[u8]), String> {
+pub fn decode(_b: &[u8]) -> Result<(Value, &[u8]), DecodeError> {
   let bytes = _b;
 
   let emp_bit = decode_bit(bytes);
@@ -327,7 +356,7 @@ pub fn decode(_b: &[u8]) -> Result<(Value, &[u8]), String> {
     Err(e) => return Err(e),
   }
 
-  return Err(format!("Unexpected Byte: 0x{:x?}", bytes[0]));
+  return Err(DecodeError::UnexpectedByte(bytes[0]));
 }
 
 pub fn decode_safe(val: &[u8]) -> Value {

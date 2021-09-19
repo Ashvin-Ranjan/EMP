@@ -2,7 +2,6 @@ pub mod json;
 
 use std::fmt;
 
-
 #[derive(Clone)]
 pub enum Value {
   Null,
@@ -43,15 +42,20 @@ fn display(val: Value) -> String {
       }
 
       return format!("[{}]", arr.join(", "));
-    },
+    }
     Value::Object(o) => {
       let mut out = String::from("");
 
       for key in o.keys() {
-        out = format!("{}, \"{}\": {}", out, key, display(match o.get(key) {
-          Some(s) => s.clone(),
-          None => Value::Null,
-        }));
+        out = format!(
+          "{}, \"{}\": {}",
+          out,
+          key,
+          display(match o.get(key) {
+            Some(s) => s.clone(),
+            None => Value::Null,
+          })
+        );
       }
 
       return format!("{{{}}}", out[2..].to_owned());
