@@ -37,7 +37,7 @@ pub fn encode(val: Value) -> Vec<u8> {
     Value::String(s) => {
       let mut value = vec![constants::STRING];
 
-      for val in s.as_bytes() {
+      for val in s.replace(|c: char| !c.is_ascii(), "").as_bytes() {
         if val.to_owned() != constants::STRING {
           value.push(val.to_owned());
         }
