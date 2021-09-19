@@ -1,8 +1,9 @@
 use crate::constants;
 use crate::value::Value;
-use std::vec::Vec;
 
-pub fn encode(val: Value) -> Vec<u8> {
+pub mod json;
+
+pub fn encode(val: Value) -> &'static [u8] {
   match val {
     Value::Null => return vec![constants::NULL],
     Value::Bit(b) => return vec![constants::BIT, if b { 1 } else { 0 }],
@@ -50,7 +51,7 @@ pub fn encode(val: Value) -> Vec<u8> {
       let mut value = vec![constants::ARRAY_START];
       for val in a {
         for byte in encode(val) {
-          value.push(byte);
+          value.push(byte.to_owned());
         }
       }
 
@@ -62,7 +63,7 @@ pub fn encode(val: Value) -> Vec<u8> {
       let mut value = vec![constants::DICTIONARY_START];
       for key in o.keys() {
         for byte in encode(Value::String(key.to_owned())) {
-          value.push(byte);
+          value.push(byte.to_owned());
         }
 
         let val = match o.get(key) {

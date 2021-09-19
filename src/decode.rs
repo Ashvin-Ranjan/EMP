@@ -3,6 +3,8 @@ use crate::value::Value;
 use std::convert::TryInto;
 use std::collections::HashMap;
 
+pub mod json;
+
 fn decode_bit(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), String> {
   if bytes[0] != constants::BIT {
     return Ok((None, &bytes[1..]));
@@ -326,4 +328,11 @@ pub fn decode(_b: &[u8]) -> Result<(Value, &[u8]), String> {
   }
 
   return Err(format!("Unexpected Byte: 0x{:x?}", bytes[0]));
+}
+
+pub fn decode_safe(val: &[u8]) -> Value {
+  match decode(val) {
+    Ok((c, _)) => return c,
+    Err(_) => return Value::Null,
+  }
 }

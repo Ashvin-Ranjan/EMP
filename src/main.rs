@@ -1,6 +1,6 @@
 pub mod constants;
-mod decode;
-mod encode;
+pub mod decode;
+pub mod encode;
 pub mod value;
 
 use std::fs;
@@ -11,7 +11,7 @@ fn main() {
     obj.insert("index2".to_owned(), value::Value::Float(2.43));
 
     // ["This is a test",null,true,123,{"index2":2.43}]
-    let data: Vec<u8> = encode::encode(value::Value::Array(vec![
+    let data = encode::encode(value::Value::Array(vec![
         value::Value::String("This is a test".to_owned()),
         value::Value::Null,
         value::Value::Boolean(true),
@@ -26,7 +26,7 @@ fn main() {
     fs::write("encode.emp", &data).expect("Unable to write file");
 
     let out = decode::decode(&data);
-    
+
     let mut obj = std::collections::HashMap::new();
 
     obj.insert("index2".to_owned(), value::Value::Float(2.43));
