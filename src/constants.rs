@@ -1,0 +1,14 @@
+pub const DICTIONARY_START: u8 = 0b00000000;
+pub const DICTIONARY_END: u8 = 0b00000001;
+pub const ARRAY_START: u8 = 0b00000010;
+pub const ARRAY_END: u8 = 0b00000011;
+pub const STRING: u8 = 0b00000100;
+pub const NULL: u8 = 0b00000101;
+pub const BIT: u8 = 0b00000111;
+pub const BOOLEAN: u8 = 0b00001000;
+pub const INT_32: u8 = 0b00001001;
+pub const FLOAT: u8 = 0b00001010;
+pub const DOUBLE: u8 = 0b00001011;
+pub const INT_64: u8 = 0b00001100;
+pub const INT_16: u8 = 0b00001101;
+pub const INT_8: u8 = 0b00001110;
