@@ -7,7 +7,29 @@ pub fn from_json(val: serde_json::Value) -> value::Value {
     serde_json::Value::Null => return value::Value::Null,
     serde_json::Value::Bool(b) => return value::Value::Boolean(b),
     serde_json::Value::Number(n) => match n.as_f64() {
-      Some(doub) => return value::Value::Double(doub),
+      Some(doub) => {
+        if doub - doub.floor() > 0.0000003 {
+          return value::Value::Double(doub)
+        }
+        let numb = doub as u64;
+        if numb < 2 {
+          return value::Value::Bit(numb == 1);
+        }
+
+        if numb < u8::MAX as u64 {
+          return value::Value::Int8(numb as u8);
+        }
+
+        if numb < u16::MAX as u64 {
+          return value::Value::Int16(numb as u16);
+        }
+
+        if numb < u32::MAX as u64 {
+          return value::Value::Int32(numb as u32);
+        }
+
+        return value::Value::Int64(numb);
+      }
       None => match n.as_u64() {
         Some(numb) => {
           if numb < 2 {
