@@ -30,11 +30,11 @@ fn display(val: Value) -> String {
     Value::Bit(i) => return (if i { "1" } else { "0" }).to_owned(),
     Value::Boolean(i) => return (if i { "true" } else { "false" }).to_owned(),
     Value::Int32(i) => return format!("{}", i),
-    Value::Int64(i) => return format!("{}", i),
-    Value::Int16(i) => return format!("{}", i),
-    Value::Int8(i) => return format!("{}", i),
-    Value::Float(i) => return format!("{}", i),
-    Value::Double(i) => return format!("{}", i),
+    Value::Int64(i) => return format!("{}l", i),
+    Value::Int16(i) => return format!("{}s", i),
+    Value::Int8(i) => return format!("{}B", i),
+    Value::Float(i) => return format!("{}f", i),
+    Value::Double(i) => return format!("{}d", i),
     Value::Array(a) => {
       let mut arr = vec![];
       for v in a {

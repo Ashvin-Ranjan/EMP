@@ -96,19 +96,21 @@ fn decode_null(bytes: &[u8]) -> (Option<Value>, &[u8]) {
 }
 
 fn decode_int32(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
-  if bytes[0] != constants::INT_32 {
+  if bytes[0] & 0x0F != constants::INT_32 {
     return Ok((None, &bytes[1..]));
   }
+  
+  let back: usize = (bytes[0] >> 4).into();
 
-  if bytes.len() < 5 {
+  if bytes.len() < 5 - back {
     return Err(DecodeError::EOFError);
   }
-
+  
   return Ok((
     Some(Value::Int32(u32::from_be_bytes(
-      bytes[1..5].try_into().expect("Slice with incorrect length"),
+      force_to_length(&bytes[1..5 - back], 4).try_into().expect("Slice with incorrect length"),
     ))),
-    &bytes[5..],
+    &bytes[5 - back..],
   ));
 }
 
@@ -156,70 +158,78 @@ fn decode_object(_b: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
 }
 
 fn decode_float(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
-  if bytes[0] != constants::FLOAT {
+  if bytes[0] & 0x0F != constants::FLOAT {
     return Ok((None, &bytes[1..]));
   }
 
-  if bytes.len() < 5 {
+  let back: usize = (bytes[0] >> 4).into();
+
+  if bytes.len() < 5 - back {
     return Err(DecodeError::EOFError);
   }
 
   return Ok((
     Some(Value::Float(f32::from_be_bytes(
-      bytes[1..5].try_into().expect("Slice with incorrect length"),
+      force_to_length(&bytes[1..5 - back], 4).try_into().expect("Slice with incorrect length"),
     ))),
-    &bytes[5..],
+    &bytes[5 - back..],
   ));
 }
 
 fn decode_double(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
-  if bytes[0] != constants::DOUBLE {
+  if bytes[0] & 0x0F != constants::DOUBLE {
     return Ok((None, &bytes[1..]));
   }
+  
+  let back: usize = (bytes[0] >> 4).into();
 
-  if bytes.len() < 9 {
+  if bytes.len() < 9 - back {
     return Err(DecodeError::EOFError);
   }
 
   return Ok((
     Some(Value::Double(f64::from_be_bytes(
-      bytes[1..9].try_into().expect("Slice with incorrect length"),
+      force_to_length(&bytes[1..9 - back], 8).try_into().expect("Slice with incorrect length"),
     ))),
-    &bytes[9..],
+    &bytes[9 - back..],
   ));
 }
 
 fn decode_int64(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
-  if bytes[0] != constants::INT_64 {
+  if bytes[0] & 0x0F != constants::INT_64 {
     return Ok((None, &bytes[1..]));
   }
 
-  if bytes.len() < 9 {
+  let back: usize = (bytes[0] >> 4).into();
+
+  if bytes.len() < 9 - back {
     return Err(DecodeError::EOFError);
   }
 
   return Ok((
     Some(Value::Int64(u64::from_be_bytes(
-      bytes[1..9].try_into().expect("Slice with incorrect length"),
+      force_to_length(&bytes[1..9 - back], 8).try_into().expect("Slice with incorrect length"),
     ))),
-    &bytes[9..],
+    &bytes[9 - back..],
   ));
 }
 
 fn decode_int16(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
-  if bytes[0] != constants::INT_16 {
+  if bytes[0] & 0x0F != constants::INT_16 {
     return Ok((None, &bytes[1..]));
   }
 
-  if bytes.len() < 3 {
+  let back: usize = (bytes[0] >> 4).into();
+
+  if bytes.len() < 3 - back {
     return Err(DecodeError::EOFError);
   }
 
   return Ok((
     Some(Value::Int16(u16::from_be_bytes(
-      bytes[1..3].try_into().expect("Slice with incorrect length"),
+      force_to_length(&bytes[1..3 - back], 2).try_into().expect("Slice with incorrect length"),
     ))),
-    &bytes[3..],
+    &bytes[3 - back ..],
   ));
 }
 
@@ -356,7 +366,7 @@ pub fn decode(_b: &[u8]) -> Result<(Value, &[u8]), DecodeError> {
     Err(e) => return Err(e),
   }
 
-  return Err(DecodeError::UnexpectedByte(bytes[0]));
+  return Err(DecodeError::UnexpectedByte(bytes[0], bytes.len() as u64));
 }
 
 pub fn decode_safe(val: &[u8]) -> Value {
@@ -364,4 +374,15 @@ pub fn decode_safe(val: &[u8]) -> Value {
     Ok((c, _)) => return c,
     Err(_) => return Value::Null,
   }
+}
+
+fn force_to_length(arr: &[u8], n: u64) -> Vec<u8> {
+  let mut zero: Vec<u8> = Vec::new();
+
+  while zero.len() + arr.len() < n as usize {
+    zero.push(0);
+  }
+
+  let out = [zero, Vec::from(arr)].concat();
+  return out;
 }

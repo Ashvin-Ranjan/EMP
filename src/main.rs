@@ -5,6 +5,7 @@ pub mod errors;
 pub mod value;
 
 use std::fs;
+use std::io::Read;
 
 fn main() {
   let mut obj = std::collections::HashMap::new();
@@ -16,8 +17,17 @@ fn main() {
 
     fs::write("encode.emp", &data).expect("Unable to write file");
 
-    let out = decode::json::decode_json(&data);
+    let mut d = std::vec::Vec::new();
 
-    println!("Extracted data: {}", out)
+    let mut f = fs::File::open("encode.emp").expect("Unable to read file");
+
+    f.read_to_end(&mut d).expect("Cannot read");
+
+    let out = decode::json::decode_json_unsafe(&d);
+
+    match out {
+      Ok(o) => println!("Extracted data: {}", o),
+      Err(e) => println!("Error: {}", e),
+    }
   }
 }
