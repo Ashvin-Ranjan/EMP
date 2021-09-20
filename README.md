@@ -30,7 +30,7 @@ Using `emp::decode::decode` you can pass in a `&[u8]` and get an `Result<emp::va
 `DecodeError` is an enum that is as so:
 ```rs
 pub enum DecodeError {
-  UnexpectedByte(u8),
+  UnexpectedByte(u8, u64),
   EOFError,
   UnmatchedKey(std::string::String),
   StringDecodeError(std::str::Utf8Error),
@@ -48,4 +48,5 @@ This crate is compatible with `serde_json`, by using `emp::value::json::from_jso
 Using `emp::encode::json::encode_json` you can encode a `serde_json::Value` directly into `emp` bytecode.
 
 #### Decoding
-Using `emp::decode::json::decode_json` you can decode `emp` bytecode directly into a `serde_json::value`, this uses `decode_safe` rather than `decode`.
+Using `emp::decode::json::decode_json` you can decode `emp` bytecode directly into a `serde_json::Value`, this uses `decode_safe` rather than `decode`.
+You can also use `emp::decode::json::decode_json_unsafe` to get the error instead of a `serde_json::Value::Null` 
