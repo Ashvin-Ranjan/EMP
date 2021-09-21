@@ -4,6 +4,7 @@ use std::string::String;
 pub enum ArgumentOptions {
   ReadFromFile(String),
   FromJSON(String),
+  Version,
   Help,
 }
 
@@ -23,6 +24,7 @@ pub fn resolve_arguments(_a: env::Args) -> ArgumentOptions {
         }
         return ArgumentOptions::Help;
       }
+      "-v" | "--version" => return ArgumentOptions::Version,
       _ => return ArgumentOptions::Help,
     },
     None => return ArgumentOptions::Help,

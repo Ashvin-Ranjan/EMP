@@ -27,10 +27,12 @@ fn main() {
       }
       Err(_) => println!("Unable to parse JSON Data (Did you put it in quotes?)"),
     },
+    ArgumentOptions::Version => println!("EMP {}", env!("CARGO_PKG_VERSION")),
     ArgumentOptions::Help => {
       println!("┌───────────────────────────────────┐");
       println!("│[E]fficiently [M]anaged [P]ackaging│");
       println!("│               Help:               │");
+      println!("│                                   │");
       println!("│[-r | --read] <filename>: Reads the│");
       println!("│EMP bytecode and prints it out as a│");
       println!("│EMP string.                        │");
@@ -41,6 +43,9 @@ fn main() {
       println!("│                                   │");
       println!("│NOTE: Make sure your json data is  │");
       println!("│in quotes                          │");
+      println!("│                                   │");
+      println!("│[-v | --Version]: Prints out the   │");
+      println!("│version of EMP you are using       │");
       println!("└───────────────────────────────────┘");
     }
   }
