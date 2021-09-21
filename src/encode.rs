@@ -52,7 +52,9 @@ pub fn encode(val: Value) -> Vec<u8> {
       return value;
     }
     Value::String(s) => {
-      let mut value = vec![constants::STRING];
+      let set_len = s.len() <= 0b1111;
+
+      let mut value = vec![constants::STRING | if set_len { s.len() << 4 } else { 0 } as u8];
 
       for val in s.replace(|c: char| !c.is_ascii(), "").as_bytes() {
         if val.to_owned() != constants::STRING {
@@ -60,23 +62,32 @@ pub fn encode(val: Value) -> Vec<u8> {
         }
       }
 
-      value.push(constants::STRING);
+      if !set_len {
+        value.push(constants::STRING);
+      }
       return value;
     }
     Value::Array(a) => {
-      let mut value = vec![constants::ARRAY_START];
+      let set_len = a.len() <= 0b1111;
+
+      let mut value = vec![constants::ARRAY_START | if set_len { a.len() << 4 } else { 0 } as u8];
       for val in a {
         for byte in encode(val) {
           value.push(byte);
         }
       }
 
-      value.push(constants::ARRAY_END);
+      if !set_len {
+        value.push(constants::ARRAY_END);
+      }
 
       return value;
     }
     Value::Object(o) => {
-      let mut value = vec![constants::DICTIONARY_START];
+      let set_len = o.keys().len() <= 0b1111;
+
+      let mut value =
+        vec![constants::DICTIONARY_START | if set_len { o.keys().len() << 4 } else { 0 } as u8];
       for key in o.keys() {
         for byte in encode(Value::String(key.to_owned())) {
           value.push(byte);
@@ -92,7 +103,9 @@ pub fn encode(val: Value) -> Vec<u8> {
         }
       }
 
-      value.push(constants::DICTIONARY_END);
+      if !set_len {
+        value.push(constants::DICTIONARY_END);
+      }
 
       return value;
     }
@@ -140,10 +153,9 @@ fn get_leading_zeros(val: Vec<u8>) -> u8 {
   let mut out = 0;
   for v in val {
     if v != 0 {
-      return out
+      return out;
     }
     out += 1
   }
-  
   return out;
 }
