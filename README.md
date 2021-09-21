@@ -12,12 +12,12 @@ pub enum Value {
   String(std::string::String),
   Bit(bool),
   Boolean(bool),
-  Int32(u32),
+  Int32(i32),
   Float(f32),
   Double(f64),
-  Int64(u64),
-  Int16(u16),
-  Int8(u8),
+  Int64(i64),
+  Int16(i16),
+  Int8(i8),
 }
 ```
 

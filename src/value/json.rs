@@ -8,46 +8,46 @@ pub fn from_json(val: serde_json::Value) -> value::Value {
     serde_json::Value::Bool(b) => return value::Value::Boolean(b),
     serde_json::Value::Number(n) => match n.as_f64() {
       Some(doub) => {
-        if doub - doub.floor() > 0.0000003 {
+        if !(doub - doub.floor() < 0.0000003 && doub - doub.floor() > -0.0000003) {
           return value::Value::Double(doub)
         }
-        let numb = doub as u64;
-        if numb < 2 {
+        let numb = doub as i64;
+        if numb == 0 && numb == 1 {
           return value::Value::Bit(numb == 1);
         }
 
-        if numb < u8::MAX as u64 {
-          return value::Value::Int8(numb as u8);
+        if numb < i8::MAX as i64 && numb > i8::MIN as i64 {
+          return value::Value::Int8(numb as i8);
         }
 
-        if numb < u16::MAX as u64 {
-          return value::Value::Int16(numb as u16);
+        if numb < i16::MAX as i64 && numb > i16::MIN as i64 {
+          return value::Value::Int16(numb as i16);
         }
 
-        if numb < u32::MAX as u64 {
-          return value::Value::Int32(numb as u32);
+        if numb < i32::MAX as i64 && numb > i32::MIN as i64 {
+          return value::Value::Int32(numb as i32);
         }
 
         return value::Value::Int64(numb);
       }
-      None => match n.as_u64() {
+      None => match n.as_i64() {
         Some(numb) => {
-          if numb < 2 {
+          if numb == 0 && numb == 1 {
             return value::Value::Bit(numb == 1);
           }
-
-          if numb < u8::MAX as u64 {
-            return value::Value::Int8(numb as u8);
+  
+          if numb < i8::MAX as i64 && numb > i8::MIN as i64 {
+            return value::Value::Int8(numb as i8);
           }
-
-          if numb < u16::MAX as u64 {
-            return value::Value::Int16(numb as u16);
+  
+          if numb < i16::MAX as i64 && numb > i16::MIN as i64 {
+            return value::Value::Int16(numb as i16);
           }
-
-          if numb < u32::MAX as u64 {
-            return value::Value::Int32(numb as u32);
+  
+          if numb < i32::MAX as i64 && numb > i32::MIN as i64 {
+            return value::Value::Int32(numb as i32);
           }
-
+  
           return value::Value::Int64(numb);
         }
         None => return value::Value::Null,
