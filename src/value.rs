@@ -26,7 +26,7 @@ impl fmt::Display for Value {
 
 fn display(val: Value) -> String {
     match val {
-        Value::String(s) => return s,
+        Value::String(s) => return format!("\"{}\"", s),
         Value::Bit(i) => return (if i { "1b" } else { "0b" }).to_owned(),
         Value::Boolean(i) => return (if i { "true" } else { "false" }).to_owned(),
         Value::Int32(i) => return format!("{}", i),
