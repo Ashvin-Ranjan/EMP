@@ -46,7 +46,7 @@ fn main() {
             println!("│NOTE: Make sure your json data is  │");
             println!("│in quotes                          │");
             println!("│                                   │");
-            println!("│[-v | --Version]: Prints out the   │");
+            println!("│[-v | --version]: Prints out the   │");
             println!("│version of EMP you are using       │");
             println!("└───────────────────────────────────┘");
         }

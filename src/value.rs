@@ -3,7 +3,7 @@ pub mod json;
 use std::fmt;
 use crate::constants;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Value {
     Null,
     Object(std::collections::HashMap<std::string::String, Value>),
@@ -27,7 +27,7 @@ impl fmt::Display for Value {
 
 fn display(val: Value) -> String {
     match val {
-        Value::String(s) => return s,
+        Value::String(s) => return format!("\"{}\"", s),
         Value::Bit(i) => return format!("{}{}", if i { "1" } else { "0" }, constants::EMP_BIT),
         Value::Boolean(i) => return (if i { "true" } else { "false" }).to_owned(),
         Value::Int32(i) => return format!("{}", i),
