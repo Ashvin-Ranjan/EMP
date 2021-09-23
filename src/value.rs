@@ -1,6 +1,7 @@
 pub mod json;
 
 use std::fmt;
+use crate::constants;
 
 #[derive(Clone)]
 pub enum Value {
@@ -27,14 +28,14 @@ impl fmt::Display for Value {
 fn display(val: Value) -> String {
     match val {
         Value::String(s) => return s,
-        Value::Bit(i) => return (if i { "1b" } else { "0b" }).to_owned(),
+        Value::Bit(i) => return format!("{}{}", if i { "1" } else { "0" }, constants::EMP_BIT),
         Value::Boolean(i) => return (if i { "true" } else { "false" }).to_owned(),
         Value::Int32(i) => return format!("{}", i),
-        Value::Int64(i) => return format!("{}l", i),
-        Value::Int16(i) => return format!("{}s", i),
-        Value::Int8(i) => return format!("{}B", i),
-        Value::Float(i) => return format!("{}f", i),
-        Value::Double(i) => return format!("{}d", i),
+        Value::Int64(i) => return format!("{}{}", i, constants::EMP_LONG),
+        Value::Int16(i) => return format!("{}{}", i, constants::EMP_SHORT),
+        Value::Int8(i) => return format!("{}{}", i, constants::EMP_BYTE),
+        Value::Float(i) => return format!("{}{}", i, constants::EMP_FLOAT),
+        Value::Double(i) => return format!("{}{}", i, constants::EMP_DOUBLE),
         Value::Array(a) => {
             let mut arr = vec![];
             for v in a {
