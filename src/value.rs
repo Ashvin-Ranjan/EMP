@@ -2,7 +2,7 @@ pub mod json;
 
 use std::fmt;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Value {
     Null,
     Object(std::collections::HashMap<std::string::String, Value>),
