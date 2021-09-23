@@ -8,7 +8,8 @@ repository = "https://github.com/Ashvin-Ranjan/EMP/"
 categories = ["command-line-utilities", "encoding"]
 description = "An Efficiently Managed Packaging system, NBT but better!"
 keywords = ["EMP", "NBT", "json", "encoding", "decoding"]
-homepage = "https://ash.vin/.github/EMP"
+homepage = "https://docs.rs/emp"
+documentation = "https://docs.rs/emp"
 
 [dependencies]
 serde_json = "1.0.68"
