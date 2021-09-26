@@ -21,6 +21,21 @@ fn main() {
             }
             Err(_) => println!("Unable to read file (Are you sure it exists?)"),
         },
+        ArgumentOptions::WriteToFile(file, val) => {
+            let data = match value::parse::from_str(&val) {
+                Ok(emp) => emp,
+                Err(e) => {
+                    println!(
+                        "Unable to parse EMP Data (Did you put it in quotes?): {}",
+                        e
+                    );
+                    return;
+                }
+            };
+
+            fs::write(file, &encode::encode(data))
+                .expect("Unable to write to file (Do you have permission?)");
+        }
         ArgumentOptions::FromJSON(json) => {
             match serde_json::from_str::<serde_json::Value>(&json[..]) {
                 Ok(json) => {
@@ -29,6 +44,15 @@ fn main() {
                 Err(_) => println!("Unable to parse JSON Data (Did you put it in quotes?)"),
             }
         }
+        ArgumentOptions::ToJSON(emp) => match value::parse::from_str(&emp) {
+            Ok(emp) => {
+                println!("{}", value::json::to_json(emp))
+            }
+            Err(e) => println!(
+                "Unable to parse EMP Data (Did you put it in quotes?): {}",
+                e
+            ),
+        },
         ArgumentOptions::Version => println!("EMP {}", env!("CARGO_PKG_VERSION")),
         ArgumentOptions::Help => {
             println!("┌───────────────────────────────────┐");
@@ -39,12 +63,26 @@ fn main() {
             println!("│EMP bytecode and prints it out as a│");
             println!("│EMP string.                        │");
             println!("│                                   │");
+            println!("│[-w | --write] <filename> <emp>:   │");
+            println!("|Writes the EMP data into the file  │");
+            println!("│as EMP bytecode.                   │");
+            println!("│                                   │");
+            println!("│NOTE: Make sure your EMP data is in│");
+            println!("│quotes.                            │");
+            println!("│                                   │");
             println!("│[-fj | --from_json] <json>: Parses │");
             println!("│the JSON data and prints it out as │");
             println!("│an EMP string.                     │");
             println!("│                                   │");
             println!("│NOTE: Make sure your json data is  │");
-            println!("│in quotes                          │");
+            println!("│in quotes.                         │");
+            println!("│                                   │");
+            println!("│[-tj | --to_json] <emp>: Parses the│");
+            println!("│EMP data and prints it out as a    │");
+            println!("│json string.                       │");
+            println!("│                                   │");
+            println!("│NOTE: Make sure your EMP data is in│");
+            println!("│quotes.                            │");
             println!("│                                   │");
             println!("│[-v | --version]: Prints out the   │");
             println!("│version of EMP you are using       │");

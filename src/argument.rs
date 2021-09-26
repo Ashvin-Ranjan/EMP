@@ -3,7 +3,9 @@ use std::string::String;
 
 pub enum ArgumentOptions {
     ReadFromFile(String),
+    WriteToFile(String, String),
     FromJSON(String),
+    ToJSON(String),
     Version,
     Help,
 }
@@ -18,9 +20,23 @@ pub fn resolve_arguments(_a: env::Args) -> ArgumentOptions {
                 }
                 return ArgumentOptions::Help;
             }
+            "-w" | "--write" => {
+                if let Some(file) = args.nth(0) {
+                    if let Some(val) = args.nth(0) {
+                        return ArgumentOptions::WriteToFile(file, val);
+                    }
+                }
+                return ArgumentOptions::Help;
+            }
             "-fj" | "--from_json" => {
                 if let Some(json) = args.nth(0) {
                     return ArgumentOptions::FromJSON(json);
+                }
+                return ArgumentOptions::Help;
+            }
+            "-tj" | "--to_json" => {
+                if let Some(emp) = args.nth(0) {
+                    return ArgumentOptions::ToJSON(emp);
                 }
                 return ArgumentOptions::Help;
             }

@@ -394,7 +394,7 @@ pub fn parse(tokens: &[String]) -> Result<(Value, &[String]), ParseError> {
     return Err(ParseError::UnexpectedTokenError(tokens[0].clone()));
 }
 
-pub fn from_string(string: &str) -> Result<Value, ParseError> {
+pub fn from_str(string: &str) -> Result<Value, ParseError> {
     match lex(string) {
         Ok(tok) => match parse(&tok) {
             Ok((val, _)) => return Ok(val),
