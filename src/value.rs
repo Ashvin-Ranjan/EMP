@@ -1,7 +1,8 @@
 pub mod json;
+pub mod parse;
 
-use std::fmt;
 use crate::constants;
+use std::fmt;
 
 #[derive(Clone, Debug)]
 pub enum Value {
