@@ -348,9 +348,16 @@ pub fn parse(tokens: &[String]) -> Result<(Value, &[String]), ParseError> {
 pub fn from_str(string: &str) -> Result<Value, ParseError> {
     match lex(string) {
         Ok(tok) => match parse(&tok) {
-            Ok((val, _)) => return Ok(val),
-            Err(e) => return Err(e),
+            Ok((val, _)) => Ok(val),
+            Err(e) => Err(e),
         },
-        Err(e) => return Err(e),
+        Err(e) => Err(e),
+    }
+}
+
+pub fn from_str_safe(string: &str) -> Value {
+    match from_str(string) {
+        Ok(o) => o,
+        Err(_) => Value::Null,
     }
 }
