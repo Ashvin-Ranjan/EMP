@@ -6,11 +6,13 @@ use std::str::FromStr;
 use std::string::String;
 use std::vec::Vec;
 
+#[macro_use]
+mod macros;
+
 const DIGITS: [char; 12] = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', '-'];
 
-fn lex_num(_s: &str) -> Result<(Option<String>, &str), ParseError> {
+fn lex_num(mut string: &str) -> Result<(Option<String>, &str), ParseError> {
     let mut emp_numb = String::from("");
-    let mut string = _s;
 
     if !DIGITS.contains(&string.chars().next().unwrap()) {
         return Ok((None, string));
@@ -44,8 +46,7 @@ fn lex_null(string: &str) -> (Option<String>, &str) {
     return (None, string);
 }
 
-fn lex_string(_s: &str) -> Result<(Option<String>, &str), ParseError> {
-    let mut string = _s;
+fn lex_string(mut string: &str) -> Result<(Option<String>, &str), ParseError> {
     let mut emp_string = String::from("\"");
 
     if string.chars().next().unwrap() != constants::EMP_QUOTE {
@@ -93,9 +94,8 @@ fn lex_bool(string: &str) -> (Option<String>, &str) {
     return (None, string);
 }
 
-pub fn lex(_s: &str) -> Result<Vec<String>, ParseError> {
+pub fn lex(mut string: &str) -> Result<Vec<String>, ParseError> {
     let mut tokens: Vec<String> = vec![];
-    let mut string = _s;
 
     while string.len() != 0 {
         match lex_num(string) {
@@ -156,12 +156,11 @@ pub fn lex(_s: &str) -> Result<Vec<String>, ParseError> {
     return Ok(tokens);
 }
 
-fn parse_array(_t: &[String]) -> Result<(Option<Value>, &[String]), ParseError> {
-    let mut tokens = _t;
+fn parse_array(mut tokens: &[String]) -> Result<(Option<Value>, &[String]), ParseError> {
     let mut values: Vec<Value> = vec![];
 
     if tokens[0] != String::from(constants::EMP_OPEN_BRACE) {
-        return Ok((None, _t));
+        return Ok((None, tokens));
     }
 
     tokens = &tokens[1..];
@@ -190,12 +189,11 @@ fn parse_array(_t: &[String]) -> Result<(Option<Value>, &[String]), ParseError> 
     return Err(ParseError::EOFError);
 }
 
-fn parse_object(_t: &[String]) -> Result<(Option<Value>, &[String]), ParseError> {
-    let mut tokens = _t;
+fn parse_object(mut tokens: &[String]) -> Result<(Option<Value>, &[String]), ParseError> {
     let mut values: HashMap<String, Value> = HashMap::new();
 
     if tokens[0] != String::from(constants::EMP_OPEN_BRACKET) {
-        return Ok((None, _t));
+        return Ok((None, tokens));
     }
 
     tokens = &tokens[1..];
@@ -337,59 +335,12 @@ fn parse_number(tokens: &[String]) -> Result<(Option<Value>, &[String]), ParseEr
 }
 
 pub fn parse(tokens: &[String]) -> Result<(Value, &[String]), ParseError> {
-    match parse_array(&tokens) {
-        Ok((val, tok)) => {
-            if let Some(value) = val {
-                return Ok((value, tok));
-            }
-        }
-        Err(e) => return Err(e),
-    }
-
-    match parse_object(&tokens) {
-        Ok((val, tok)) => {
-            if let Some(value) = val {
-                return Ok((value, tok));
-            }
-        }
-        Err(e) => return Err(e),
-    }
-
-    match parse_null(&tokens) {
-        Ok((val, tok)) => {
-            if let Some(value) = val {
-                return Ok((value, tok));
-            }
-        }
-        Err(e) => return Err(e),
-    }
-
-    match parse_bool(&tokens) {
-        Ok((val, tok)) => {
-            if let Some(value) = val {
-                return Ok((value, tok));
-            }
-        }
-        Err(e) => return Err(e),
-    }
-
-    match parse_string(&tokens) {
-        Ok((val, tok)) => {
-            if let Some(value) = val {
-                return Ok((value, tok));
-            }
-        }
-        Err(e) => return Err(e),
-    }
-
-    match parse_number(&tokens) {
-        Ok((val, tok)) => {
-            if let Some(value) = val {
-                return Ok((value, tok));
-            }
-        }
-        Err(e) => return Err(e),
-    }
+    try_parse!(parse_array, tokens);
+    try_parse!(parse_object, tokens);
+    try_parse!(parse_null, tokens);
+    try_parse!(parse_bool, tokens);
+    try_parse!(parse_string, tokens);
+    try_parse!(parse_number, tokens);
 
     return Err(ParseError::UnexpectedTokenError(tokens[0].clone()));
 }

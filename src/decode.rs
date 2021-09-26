@@ -5,6 +5,8 @@ use std::collections::HashMap;
 use std::convert::TryInto;
 
 pub mod json;
+#[macro_use]
+mod macros;
 
 fn decode_bit(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
     if bytes[0] != constants::BIT {
@@ -30,10 +32,8 @@ fn decode_bool(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
     return Ok((Some(Value::Boolean(bytes[1] == 1)), &bytes[2..]));
 }
 
-fn decode_array(_b: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
+fn decode_array(mut bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
     let mut emp_array: Vec<Value> = vec![];
-
-    let mut bytes = _b;
 
     if bytes[0] & 0xf != constants::ARRAY_START {
         return Ok((None, &bytes[1..]));
@@ -81,10 +81,8 @@ fn decode_array(_b: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
     return Err(DecodeError::EOFError);
 }
 
-fn decode_string(_b: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
+fn decode_string(mut bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
     let mut emp_string: Vec<u8> = vec![];
-
-    let mut bytes = _b;
 
     if bytes[0] & 0xf != constants::STRING {
         return Ok((None, &bytes[1..]));
@@ -127,12 +125,12 @@ fn decode_string(_b: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
     return Err(DecodeError::EOFError);
 }
 
-fn decode_null(bytes: &[u8]) -> (Option<Value>, &[u8]) {
+fn decode_null(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
     if bytes[0] != constants::NULL {
-        return (None, &bytes[1..]);
+        return Ok((None, &bytes[1..]));
     }
 
-    return (Some(Value::Null), &bytes[1..]);
+    return Ok((Some(Value::Null), &bytes[1..]));
 }
 
 fn decode_int32(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
@@ -154,10 +152,8 @@ fn decode_int32(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
     ));
 }
 
-fn decode_object(_b: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
+fn decode_object(mut bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
     let mut emp_object: HashMap<String, Value> = HashMap::new();
-
-    let mut bytes = _b;
 
     if bytes[0] & 0xf != constants::DICTIONARY_START {
         return Ok((None, &bytes[1..]));
@@ -327,123 +323,19 @@ fn decode_int8(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
     ));
 }
 
-pub fn decode(_b: &[u8]) -> Result<(Value, &[u8]), DecodeError> {
-    let bytes = _b;
-
-    let emp_bit = decode_bit(bytes);
-    match emp_bit {
-        Ok((val, b)) => {
-            if let Some(v) = val {
-                return Ok((v, b));
-            }
-        }
-        Err(e) => return Err(e),
-    }
-
-    let emp_bool = decode_bool(bytes);
-    match emp_bool {
-        Ok((val, b)) => {
-            if let Some(v) = val {
-                return Ok((v, b));
-            }
-        }
-        Err(e) => return Err(e),
-    }
-
-    let emp_array = decode_array(bytes);
-    match emp_array {
-        Ok((val, b)) => {
-            if let Some(v) = val {
-                return Ok((v, b));
-            }
-        }
-        Err(e) => return Err(e),
-    }
-
-    let emp_string = decode_string(bytes);
-    match emp_string {
-        Ok((val, b)) => {
-            if let Some(v) = val {
-                return Ok((v, b));
-            }
-        }
-        Err(e) => return Err(e),
-    }
-
-    let (emp_null, b) = decode_null(bytes);
-    if let Some(e) = emp_null {
-        return Ok((e, b));
-    }
-
-    let emp_int32 = decode_int32(bytes);
-    match emp_int32 {
-        Ok((val, b)) => {
-            if let Some(v) = val {
-                return Ok((v, b));
-            }
-        }
-        Err(e) => return Err(e),
-    }
-
-    let emp_object = decode_object(bytes);
-    match emp_object {
-        Ok((val, b)) => {
-            if let Some(v) = val {
-                return Ok((v, b));
-            }
-        }
-        Err(e) => return Err(e),
-    }
-
-    let emp_float = decode_float(bytes);
-    match emp_float {
-        Ok((val, b)) => {
-            if let Some(v) = val {
-                return Ok((v, b));
-            }
-        }
-        Err(e) => return Err(e),
-    }
-
-    let emp_double = decode_double(bytes);
-    match emp_double {
-        Ok((val, b)) => {
-            if let Some(v) = val {
-                return Ok((v, b));
-            }
-        }
-        Err(e) => return Err(e),
-    }
-
-    let emp_int64 = decode_int64(bytes);
-    match emp_int64 {
-        Ok((val, b)) => {
-            if let Some(v) = val {
-                return Ok((v, b));
-            }
-        }
-        Err(e) => return Err(e),
-    }
-
-    let emp_int16 = decode_int16(bytes);
-    match emp_int16 {
-        Ok((val, b)) => {
-            if let Some(v) = val {
-                return Ok((v, b));
-            }
-        }
-        Err(e) => return Err(e),
-    }
-
-    let emp_int8 = decode_int8(bytes);
-    match emp_int8 {
-        Ok((val, b)) => {
-            if let Some(v) = val {
-                return Ok((v, b));
-            }
-        }
-        Err(e) => return Err(e),
-    }
+pub fn decode(bytes: &[u8]) -> Result<(Value, &[u8]), DecodeError> {
+    try_decode!(decode_bit, bytes);
+    try_decode!(decode_bool, bytes);
+    try_decode!(decode_array, bytes);
+    try_decode!(decode_string, bytes);
+    try_decode!(decode_null, bytes);
+    try_decode!(decode_int32, bytes);
+    try_decode!(decode_object, bytes);
+    try_decode!(decode_float, bytes);
+    try_decode!(decode_double, bytes);
+    try_decode!(decode_int64, bytes);
+    try_decode!(decode_int16, bytes);
+    try_decode!(decode_int8, bytes);
 
     return Err(DecodeError::UnexpectedByteError(
         bytes[0],
