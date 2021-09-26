@@ -179,7 +179,7 @@ fn parse_array(_t: &[String]) -> Result<(Option<Value>, &[String]), ParseError> 
             Err(e) => return Err(e),
         }
 
-        if tokens[0] != "," && tokens[0] != constants::EMP_CLOSE_BRACE.to_string()  {
+        if tokens[0] != "," && tokens[0] != constants::EMP_CLOSE_BRACE.to_string() {
             return Err(ParseError::UnexpectedTokenError(tokens[0].clone()));
         }
         if tokens[0] == "," {
