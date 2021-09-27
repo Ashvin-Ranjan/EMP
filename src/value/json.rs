@@ -12,7 +12,7 @@ pub fn from_json(val: serde_json::Value) -> value::Value {
                     return value::Value::Double(doub);
                 }
                 let numb = doub as i64;
-                if numb == 0 && numb == 1 {
+                if numb == 0 || numb == 1 {
                     return value::Value::Bit(numb == 1);
                 }
 
@@ -32,7 +32,7 @@ pub fn from_json(val: serde_json::Value) -> value::Value {
             }
             None => match n.as_i64() {
                 Some(numb) => {
-                    if numb == 0 && numb == 1 {
+                    if numb == 0 || numb == 1 {
                         return value::Value::Bit(numb == 1);
                     }
 
