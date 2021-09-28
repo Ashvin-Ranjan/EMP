@@ -1,3 +1,5 @@
+//! Decoding EMP Bytecode
+
 use crate::constants;
 use crate::errors::DecodeError;
 use crate::value::Value;
@@ -323,6 +325,11 @@ fn decode_int8(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
     ));
 }
 
+/// Decodes a slice of `u8`s into a `(emp::value::Value, &[u8])` tuple
+///
+/// The `&[u8]` in the tuple is for internal use and should be discorded.
+/// If the decoder encounters an error it will return a
+/// `emp::errors::DecodeError` error instead.
 pub fn decode(bytes: &[u8]) -> Result<(Value, &[u8]), DecodeError> {
     try_decode!(decode_bit, bytes);
     try_decode!(decode_bool, bytes);
@@ -343,6 +350,9 @@ pub fn decode(bytes: &[u8]) -> Result<(Value, &[u8]), DecodeError> {
     ));
 }
 
+/// Decodes a lice of `u8`s into an `emp::value::Value`.
+///
+/// If it encounters an error it will instead return a `emp::value::Value::Null`
 pub fn decode_safe(val: &[u8]) -> Value {
     match decode(val) {
         Ok((c, _)) => return c,

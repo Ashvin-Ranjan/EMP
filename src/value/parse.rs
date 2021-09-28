@@ -1,3 +1,5 @@
+//! Parsing EMP strings into EMP Value (See values.rs for Value to String)
+
 use crate::constants;
 use crate::errors::ParseError;
 use crate::value::Value;
@@ -94,6 +96,10 @@ fn lex_bool(string: &str) -> (Option<String>, &str) {
     return (None, string);
 }
 
+/// Lexs strings into a set of tokens.
+///
+/// If it does not recognize a token or encounters an EOF unextedly it will
+/// return a `emp::errors::ParseError`
 pub fn lex(mut string: &str) -> Result<Vec<String>, ParseError> {
     let mut tokens: Vec<String> = vec![];
 
@@ -334,6 +340,12 @@ fn parse_number(tokens: &[String]) -> Result<(Option<Value>, &[String]), ParseEr
     }
 }
 
+/// Turns a slice of tokens into (`emp::value::Value`, `&[String]`) tuple,
+///
+/// The `&[String]` is needed for internal use and should be discarded.
+///
+/// The function will return an `emp::errors::ParseError` if something
+/// unexpected happens.
 pub fn parse(tokens: &[String]) -> Result<(Value, &[String]), ParseError> {
     try_parse!(parse_array, tokens);
     try_parse!(parse_object, tokens);
@@ -345,6 +357,10 @@ pub fn parse(tokens: &[String]) -> Result<(Value, &[String]), ParseError> {
     return Err(ParseError::UnexpectedTokenError(tokens[0].clone()));
 }
 
+/// This will lex and parse the string into a `emp::value::Value`
+///
+/// If either function returns a `emp::errors::ParseError` it will return that
+/// instead.
 pub fn from_str(string: &str) -> Result<Value, ParseError> {
     match lex(string) {
         Ok(tok) => match parse(&tok) {
@@ -355,6 +371,10 @@ pub fn from_str(string: &str) -> Result<Value, ParseError> {
     }
 }
 
+/// This will lex and parse the string into a `emp::value::Value`
+///
+/// If either function returns a `emp::errors::ParseError` it will return a
+/// `emp::value::Value::Null` instead.
 pub fn from_str_safe(string: &str) -> Value {
     match from_str(string) {
         Ok(o) => o,

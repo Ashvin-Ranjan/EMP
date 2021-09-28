@@ -1,7 +1,13 @@
+//! EMP Compatability with serde_json
+
 use crate::value;
 use serde_json;
 use std::collections::HashMap;
 
+/// This decodes a `serde_json::Value` into a `emp::value::Value`
+///
+/// For Numbers, this will attempt to fit the number into the smallest number
+/// of bits possible, to save space.
 pub fn from_json(val: serde_json::Value) -> value::Value {
     match val {
         serde_json::Value::Null => return value::Value::Null,
@@ -81,6 +87,7 @@ pub fn from_json(val: serde_json::Value) -> value::Value {
     }
 }
 
+/// This converts an `emp::value::Value` to a `serde_json::Value`
 pub fn to_json(val: value::Value) -> serde_json::Value {
     match val {
         value::Value::Null => return serde_json::Value::Null,

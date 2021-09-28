@@ -1,3 +1,5 @@
+//! EMP Enum to manipulate in rust
+
 pub mod json;
 pub mod parse;
 
@@ -5,6 +7,17 @@ use crate::constants;
 use std::fmt;
 
 #[derive(Clone, Debug)]
+/// EMP representation.
+///
+/// Null: `null`
+/// Object: A `HashMap` with a `std::string::String` as the key and a `Value`
+/// as the object. You cannot use a `Value` as a key because `HashMap` does
+/// not derive `Hash`.
+/// Array: A `std::vec::Vec` of `Value`s
+/// String: A `std::string::String`
+/// Bit: A boolean where true means 1 and false means 0
+/// Boolean: A boolean
+/// All numbers take in their respective types
 pub enum Value {
     Null,
     Object(std::collections::HashMap<std::string::String, Value>),
@@ -59,8 +72,10 @@ fn display(val: Value) -> String {
                     })
                 );
             }
-
-            return format!("{{{}}}", out[2..].to_owned());
+            if out.len() > 2 {
+                return format!("{{{}}}", out[2..].to_owned());
+            }
+            return "{}".to_owned();
         }
         Value::Null => return "null".to_owned(),
     }

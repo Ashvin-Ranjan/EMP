@@ -1,7 +1,10 @@
+//! When Decoding or Parsing encounters something wrong
+
 use crate::value;
 use std::fmt;
 
 #[derive(Debug)]
+/// This represents all possible errors when decoding bytecode data
 pub enum DecodeError {
     UnexpectedByteError(u8, u64),
     EOFError,
@@ -11,6 +14,7 @@ pub enum DecodeError {
 }
 
 #[derive(Debug)]
+/// This represents all possible errors when parsing EMP data
 pub enum ParseError {
     EOFError,
     UnexpectedCharacterError(char),

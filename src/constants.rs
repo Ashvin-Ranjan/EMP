@@ -1,3 +1,5 @@
+//! Constants for internal use
+
 pub const DICTIONARY_START: u8 = 0b00000000;
 pub const DICTIONARY_END: u8 = 0b00000001;
 pub const ARRAY_START: u8 = 0b00000010;

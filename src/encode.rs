@@ -1,9 +1,12 @@
+//! Encoding Values into EMP Bytecode
+
 use crate::constants;
 use crate::value::Value;
 use std::vec::Vec;
 
 pub mod json;
 
+/// Encodes an `emp::value::Value` into a `Vec<u8>` to store in a `.emp` file
 pub fn encode(val: Value) -> Vec<u8> {
     match val {
         Value::Null => return vec![constants::NULL],
@@ -55,7 +58,7 @@ pub fn encode(val: Value) -> Vec<u8> {
             return value;
         }
         Value::String(s) => {
-            let set_len = s.len() <= 0b1111;
+            let set_len = s.len() <= 0b1111 && s.len() != 0;
 
             let mut value = vec![constants::STRING | if set_len { s.len() << 4 } else { 0 } as u8];
 
@@ -71,7 +74,7 @@ pub fn encode(val: Value) -> Vec<u8> {
             return value;
         }
         Value::Array(a) => {
-            let set_len = a.len() <= 0b1111;
+            let set_len = a.len() <= 0b1111 && a.len() != 0;
 
             let mut value =
                 vec![constants::ARRAY_START | if set_len { a.len() << 4 } else { 0 } as u8];
@@ -88,7 +91,7 @@ pub fn encode(val: Value) -> Vec<u8> {
             return value;
         }
         Value::Object(o) => {
-            let set_len = o.keys().len() <= 0b1111;
+            let set_len = o.keys().len() <= 0b1111 && o.keys().len() != 0;
 
             let mut value = vec![
                 constants::DICTIONARY_START | if set_len { o.keys().len() << 4 } else { 0 } as u8,
