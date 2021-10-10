@@ -11,27 +11,19 @@ pub mod json;
 mod macros;
 
 fn decode_bit(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
-    if bytes[0] != constants::BIT {
+    if bytes[0] & 0xf != constants::BIT {
         return Ok((None, &bytes[1..]));
     }
 
-    if bytes.len() == 1 {
-        return Err(DecodeError::EOFError);
-    }
-
-    return Ok((Some(Value::Bit(bytes[1] == 1)), &bytes[2..]));
+    return Ok((Some(Value::Bit(bytes[0] >> 4 == 1)), &bytes[1..]));
 }
 
 fn decode_bool(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
-    if bytes[0] != constants::BOOLEAN {
+    if bytes[0] & 0xf != constants::BOOLEAN {
         return Ok((None, &bytes[1..]));
     }
 
-    if bytes.len() == 1 {
-        return Err(DecodeError::EOFError);
-    }
-
-    return Ok((Some(Value::Boolean(bytes[1] == 1)), &bytes[2..]));
+    return Ok((Some(Value::Boolean(bytes[0] >> 4 == 1)), &bytes[1..]));
 }
 
 fn decode_array(mut bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {

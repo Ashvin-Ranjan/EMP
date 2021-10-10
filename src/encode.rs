@@ -10,8 +10,8 @@ pub mod json;
 pub fn encode(val: Value) -> Vec<u8> {
     match val {
         Value::Null => return vec![constants::NULL],
-        Value::Bit(b) => return vec![constants::BIT, if b { 1 } else { 0 }],
-        Value::Boolean(b) => return vec![constants::BOOLEAN, if b { 1 } else { 0 }],
+        Value::Bit(b) => return vec![constants::BIT | (if b { 1 } else { 0 } << 4)],
+        Value::Boolean(b) => return vec![constants::BOOLEAN | (if b { 1 } else { 0 } << 4)],
         Value::Int32(i) => {
             let mut value =
                 vec![constants::INT_32 | get_leading_zeros(Vec::from(i.to_be_bytes())) << 4];
