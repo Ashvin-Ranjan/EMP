@@ -1,4 +1,5 @@
 #include <vector>
+// for debugging
 #include <iostream>
 
 #include "..\common\constants.hpp"
@@ -50,9 +51,12 @@ vector<unsigned char> EMPInt64Node::encode()
     vector<unsigned char> out;
     vector<unsigned char> data;
 
-    for (int i = 0; i < 8; i++)
+    cout << value << endl;
+
+    for (int i = 7; i >= 0; i--)
     {
-        data.push_back((value << (i * 8)) & 0xff);
+        data.push_back((value >> (i * 8)) & 0xff);
+        cout << std::to_string((value >> (i * 8)) & 0xff) << endl;
     }
 
     char leading = 0;
@@ -66,6 +70,9 @@ vector<unsigned char> EMPInt64Node::encode()
             break;
         }
     }
+
+    cout << std::to_string(leading) << endl;
+
     out.push_back(INT_64 | leading << 4);
     copy(data.begin(), data.end(), back_inserter(out));
     return out;

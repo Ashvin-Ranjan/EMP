@@ -11,7 +11,7 @@ int main()
     ofstream fout;
     fout.open("encode.emp", ios::binary | ios::out);
 
-    vector<unsigned char> data = EMPInt64Node(2).encode();
+    vector<unsigned char> data = EMPInt64Node(2LL).encode();
     fout.write((const char *)data.data(), data.size());
 
     fout.close();

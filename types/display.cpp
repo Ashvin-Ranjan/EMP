@@ -1,6 +1,8 @@
+// For some reason vscode hates it when I use std::to_string without including
+// sstream but including sstream breaks everything so
+
 #include <vector>
 #include <iostream>
-#include <sstream>
 #include <numeric>
 
 #include "..\common\constants.hpp"

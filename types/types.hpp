@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdint.h>
 #include <vector>
 #include <map>
 
@@ -13,7 +14,7 @@ class EMPNode
 public:
     virtual ~EMPNode(){};
     std::vector<unsigned char> encode();
-    std::string to_string() { return ""; };
+    std::string to_string();
 };
 
 // EMPNullNodes Nodes are `null` values
@@ -24,7 +25,7 @@ class EMPNullNode : public EMPNode
 {
 public:
     std::vector<unsigned char> encode();
-    std::string to_string() { return ""; };
+    std::string to_string();
     EMPNullNode(){};
 };
 
@@ -34,7 +35,7 @@ class EMPStringNode : public EMPNode
 public:
     std::string value;
     std::vector<unsigned char> encode();
-    std::string to_string() { return ""; };
+    std::string to_string();
 
     EMPStringNode(std::string val)
     {
@@ -54,7 +55,7 @@ class EMPBitNode : public EMPNode
 public:
     bool value;
     std::vector<unsigned char> encode();
-    std::string to_string() { return ""; };
+    std::string to_string();
 
     EMPBitNode(bool val)
     {
@@ -73,7 +74,7 @@ class EMPBooleanNode : public EMPNode
 public:
     bool value;
     std::vector<unsigned char> encode();
-    std::string to_string() { return ""; };
+    std::string to_string();
 
     EMPBooleanNode(bool val)
     {
@@ -85,9 +86,9 @@ public:
 class EMPInt64Node : public EMPNode
 {
 public:
-    long value;
+    int64_t value;
     std::vector<unsigned char> encode();
-    std::string to_string() { return ""; };
+    std::string to_string();
 
     EMPInt64Node(long val)
     {
@@ -99,9 +100,9 @@ public:
 class EMPInt32Node : public EMPNode
 {
 public:
-    int value;
+    uint32_t value;
     std::vector<unsigned char> encode();
-    std::string to_string() { return ""; };
+    std::string to_string();
 
     EMPInt32Node(int val)
     {
@@ -113,9 +114,9 @@ public:
 class EMPInt16Node : public EMPNode
 {
 public:
-    short value;
+    uint16_t value;
     std::vector<unsigned char> encode();
-    std::string to_string() { return ""; };
+    std::string to_string();
 
     EMPInt16Node(short val)
     {
@@ -130,9 +131,9 @@ public:
 class EMPInt8Node : public EMPNode
 {
 public:
-    char value;
+    uint8_t value;
     std::vector<unsigned char> encode();
-    std::string to_string() { return ""; };
+    std::string to_string();
 
     EMPInt8Node(char val)
     {
@@ -146,7 +147,7 @@ class EMPFloatNode : public EMPNode
 public:
     float value;
     std::vector<unsigned char> encode();
-    std::string to_string() { return ""; };
+    std::string to_string();
 
     EMPFloatNode(float val)
     {
@@ -160,7 +161,7 @@ class EMPDoubleNode : public EMPNode
 public:
     double value;
     std::vector<unsigned char> encode();
-    std::string to_string() { return ""; };
+    std::string to_string();
 
     EMPDoubleNode(double val)
     {
@@ -177,7 +178,7 @@ class EMPArrayNode : public EMPNode
 public:
     std::vector<EMPNode> value;
     std::vector<unsigned char> encode();
-    std::string to_string() { return ""; };
+    std::string to_string();
 
     EMPArrayNode(std::vector<EMPNode> val)
     {
@@ -195,7 +196,7 @@ class EMPObjectNode : public EMPNode
 public:
     std::map<std::string, EMPNode> value;
     std::vector<unsigned char> encode();
-    std::string to_string() { return ""; };
+    std::string to_string();
 
     EMPObjectNode(std::map<std::string, EMPNode> val)
     {
