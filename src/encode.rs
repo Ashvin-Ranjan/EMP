@@ -148,10 +148,13 @@ pub fn encode(val: Value) -> Vec<u8> {
             return value;
         }
         Value::Int8(i) => {
-            let mut value = vec![constants::INT_8];
+            let mut value =
+                vec![constants::INT_8 | if i <= 0x0F && i > 0 { i as u8 } else { 0 } << 4];
 
-            for val in i.to_be_bytes() {
-                value.push(val);
+            if i > 0xf || i <= 0 {
+                for val in i.to_be_bytes() {
+                    value.push(val);
+                }
             }
 
             return value;

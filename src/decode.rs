@@ -311,12 +311,19 @@ fn decode_int16(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
 }
 
 fn decode_int8(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
-    if bytes[0] != constants::INT_8 {
+    if bytes[0] & 0x0F != constants::INT_8 {
         return Ok((None, &bytes[1..]));
     }
 
-    if bytes.len() < 2 {
+    if bytes.len() < 2 && bytes[0] >> 4 & 0x0F == 0 {
         return Err(DecodeError::EOFError);
+    }
+
+    if bytes[0] >> 4 & 0x0F != 0 {
+        return Ok((
+            Some(Value::Int8(i8::from_be_bytes([bytes[0] >> 4]))),
+            &bytes[1..],
+        ));
     }
 
     return Ok((

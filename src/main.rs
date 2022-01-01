@@ -11,6 +11,16 @@ use std::env;
 use std::fs;
 
 fn main() {
+    match fs::read_to_string("encode.json") {
+        Ok(data) => match serde_json::from_str::<serde_json::Value>(&data[..]) {
+            Ok(json) => {
+                fs::write("encode.emp", &encode::encode(value::json::from_json(json)))
+                    .expect("oop");
+            }
+            Err(_) => println!("Unable to parse JSON Data (Did you put it in quotes?)"),
+        },
+        Err(_) => println!("Unable to read file (Are you sure it exists?)"),
+    }
     match argument::resolve_arguments(env::args()) {
         ArgumentOptions::ReadFromFile(file) => match fs::read(file) {
             Ok(data) => {
