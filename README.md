@@ -66,6 +66,7 @@ You can also use `emp::decode::json::decode_json_unsafe` to get the error instea
 ## The Command Line Utility
 
 You are able to run it using `emp`:
+
 ```
 ┌───────────────────────────────────┐
 │[E]fficiently [M]anaged [P]ackaging│
@@ -100,3 +101,9 @@ You are able to run it using `emp`:
 │version of EMP you are using       │
 └───────────────────────────────────┘
 ```
+
+## How the encoding scheme works
+
+To check out notes on how this works please see the comments in the [encoder function](https://github.com/Ashvin-Ranjan/EMP/blob/main/src/encode.rs)
+
+To suggest improvements to the encoding system, please [open an issue on the repo](https://github.com/Ashvin-Ranjan/EMP/issues)
