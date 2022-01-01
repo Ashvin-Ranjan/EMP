@@ -1,5 +1,7 @@
 //! # EMP
 //!
+//! ## NOTICE: EMP 1.1.x is not compatable with data from EMP 1.0.x!
+//!
 //! EMP is a bytecode format which is able to pack JSON and NBT data into an
 //! even smaller file size, which is useful for storage of large amounts of
 //! data.
