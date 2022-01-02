@@ -18,11 +18,12 @@ pub fn encode(val: Value) -> Vec<u8> {
         Value::Bit(b) => return vec![constants::BIT | (if b { 1 } else { 0 } << 4)],
         Value::Boolean(b) => return vec![constants::BOOLEAN | (if b { 1 } else { 0 } << 4)],
 
-        // All number values except for bits and bytes have what I call heading byte optimization.
+        // All number values except for bits and bytes have what I call heading byte optimization and
+        // negative number optimization.
         //
-        // Since all of the values can be represented by 8 bytes or less we use the MSB to store whether the
-        // number is negative or not, and we use the remaining 3 bits available to us to store the amout of
-        // bytes containing 0x00, which saves on space when these are used to store small values. This does
+        // Since negative numbers are normally encoding using a lot of bytes, use the MSB to store whether
+        // the number is negative or not, and we use the remaining 3 bits available to us to store the amount
+        // of bytes containing 0x00, which saves on space when these are used to store small values. This does
         // mean that for a 0l there is a byte containing 0x00 which cannot be trimmed off but I have come to
         // the conclusion that it is worth it for the optimization of negative numbers.
         Value::Int64(i) => {
