@@ -20,14 +20,11 @@ pub fn encode(val: Value) -> Vec<u8> {
 
         // All number values except for bits and bytes have what I call heading byte optimization.
         //
-        // Since all of the values can be represented by 8 bytes or less we can use the 4 bits available to
-        // us to store the amout of bytes containing 0x00, which saves on space when these are used to store
-        // small values.
-        //
-        // Ideally in the future I would like to have it so the trailing bits are accounted for too, using the
-        // fact that I can maybe get away with counting 0b0000 to 0b1000 as the amount of heading bits and
-        // 0b1001 - 0b1111 as the trailing bits and choosing which one to give depending on the space it would
-        // save. This would be especially useful for negative numbers.
+        // Since all of the values can be represented by 8 bytes or less we use the MSB to store whether the
+        // number is negative or not, and we use the remaining 3 bits available to us to store the amout of
+        // bytes containing 0x00, which saves on space when these are used to store small values. This does
+        // mean that for a 0l there is a byte containing 0x00 which cannot be trimmed off but I have come to
+        // the conclusion that it is worth it for the optimization of negative numbers.
         Value::Int64(i) => {
             let bytes = i.abs().to_be_bytes();
             let leading = get_leading_zeros(Vec::from(bytes));
