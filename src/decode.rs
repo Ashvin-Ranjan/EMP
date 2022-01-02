@@ -133,16 +133,18 @@ fn decode_int32(bytes: &[u8]) -> Result<(Option<Value>, &[u8]), DecodeError> {
     }
     let back: usize = (bytes[0] >> 4).into();
 
-    if bytes.len() < 5 - back {
+    if bytes.len() < 5 - (back & 0b0111) {
         return Err(DecodeError::EOFError);
     }
     return Ok((
-        Some(Value::Int32(i32::from_be_bytes(
-            force_to_length(&bytes[1..5 - back], 4)
-                .try_into()
-                .expect("Slice with incorrect length"),
-        ))),
-        &bytes[5 - back..],
+        Some(Value::Int32(
+            i32::from_be_bytes(
+                force_to_length(&bytes[1..5 - (back & 0b0111)], 4)
+                    .try_into()
+                    .expect("Slice with incorrect length"),
+            ) * if (back as i32 >> 3) == 0 { 1 } else { -1 },
+        )),
+        &bytes[5 - (back & 0b0111)..],
     ));
 }
 

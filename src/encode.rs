@@ -44,12 +44,15 @@ pub fn encode(val: Value) -> Vec<u8> {
             return value;
         }
         Value::Int32(i) => {
-            let mut value =
-                vec![constants::INT_32 | get_leading_zeros(Vec::from(i.to_be_bytes())) << 4];
+            let mut value = vec![
+                constants::INT_32
+                    | get_leading_zeros(Vec::from(i.abs().to_be_bytes())) << 4
+                    | if i < 0 { 0xC0 } else { 0 },
+            ];
 
             let mut first_numb = false;
 
-            for val in i.to_be_bytes() {
+            for val in i.abs().to_be_bytes() {
                 if val != 0 || first_numb {
                     value.push(val);
                     first_numb = true;
@@ -194,7 +197,7 @@ pub fn encode(val: Value) -> Vec<u8> {
 fn get_leading_zeros(val: Vec<u8>) -> u8 {
     let mut out = 0;
     for v in val {
-        if v != 0 {
+        if v != 0 || out == 7 {
             return out;
         }
         out += 1
