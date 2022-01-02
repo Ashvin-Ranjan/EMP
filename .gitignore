@@ -2,6 +2,3 @@
 *.emp
 *.json
 *.nbt
-!tests/*.emp
-!tests/*.json
-!tests/*.nbt

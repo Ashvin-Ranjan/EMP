@@ -29,80 +29,52 @@ pub fn encode(val: Value) -> Vec<u8> {
         // 0b1001 - 0b1111 as the trailing bits and choosing which one to give depending on the space it would
         // save. This would be especially useful for negative numbers.
         Value::Int64(i) => {
+            let bytes = i.abs().to_be_bytes();
+            let leading = get_leading_zeros(Vec::from(bytes));
             let mut value =
-                vec![constants::INT_64 | get_leading_zeros(Vec::from(i.to_be_bytes())) << 4];
+                vec![constants::INT_64 | leading << 4 | if i < 0 { 0b10000000 } else { 0 }];
 
-            let mut first_numb = false;
-
-            for val in i.to_be_bytes() {
-                if val != 0 || first_numb {
-                    value.push(val);
-                    first_numb = true;
-                }
-            }
+            value.append(&mut (bytes[(leading as usize)..bytes.len()]).to_vec());
 
             return value;
         }
         Value::Int32(i) => {
-            let mut value = vec![
-                constants::INT_32
-                    | get_leading_zeros(Vec::from(i.abs().to_be_bytes())) << 4
-                    | if i < 0 { 0xC0 } else { 0 },
-            ];
+            let bytes = i.abs().to_be_bytes();
+            let leading = get_leading_zeros(Vec::from(bytes));
+            let mut value =
+                vec![constants::INT_32 | leading << 4 | if i < 0 { 0b10000000 } else { 0 }];
 
-            let mut first_numb = false;
-
-            for val in i.abs().to_be_bytes() {
-                if val != 0 || first_numb {
-                    value.push(val);
-                    first_numb = true;
-                }
-            }
+            value.append(&mut (bytes[(leading as usize)..bytes.len()]).to_vec());
 
             return value;
         }
         Value::Int16(i) => {
+            let bytes = i.abs().to_be_bytes();
+            let leading = get_leading_zeros(Vec::from(bytes));
             let mut value =
-                vec![constants::INT_16 | get_leading_zeros(Vec::from(i.to_be_bytes())) << 4];
+                vec![constants::INT_16 | leading << 4 | if i < 0 { 0b10000000 } else { 0 }];
 
-            let mut first_numb = false;
-
-            for val in i.to_be_bytes() {
-                if val != 0 || first_numb {
-                    value.push(val);
-                    first_numb = true;
-                }
-            }
+            value.append(&mut (bytes[(leading as usize)..bytes.len()]).to_vec());
 
             return value;
         }
         Value::Float(i) => {
+            let bytes = i.abs().to_be_bytes();
+            let leading = get_leading_zeros(Vec::from(bytes));
             let mut value =
-                vec![constants::FLOAT | get_leading_zeros(Vec::from(i.to_be_bytes())) << 4];
+                vec![constants::FLOAT | leading << 4 | if i < 0.0 { 0b10000000 } else { 0 }];
 
-            let mut first_numb = false;
-
-            for val in i.to_be_bytes() {
-                if val != 0 || first_numb {
-                    value.push(val);
-                    first_numb = true;
-                }
-            }
+            value.append(&mut (bytes[(leading as usize)..bytes.len()]).to_vec());
 
             return value;
         }
         Value::Double(i) => {
+            let bytes = i.abs().to_be_bytes();
+            let leading = get_leading_zeros(Vec::from(bytes));
             let mut value =
-                vec![constants::DOUBLE | get_leading_zeros(Vec::from(i.to_be_bytes())) << 4];
+                vec![constants::DOUBLE | leading << 4 | if i < 0.0 { 0b10000000 } else { 0 }];
 
-            let mut first_numb = false;
-
-            for val in i.to_be_bytes() {
-                if val != 0 || first_numb {
-                    value.push(val);
-                    first_numb = true;
-                }
-            }
+            value.append(&mut (bytes[(leading as usize)..bytes.len()]).to_vec());
 
             return value;
         }
