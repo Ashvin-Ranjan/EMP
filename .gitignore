@@ -1,3 +1,5 @@
+bin/
+.vscode/
+*.dSYM/
 *.o
-*.exe
 *.emp
