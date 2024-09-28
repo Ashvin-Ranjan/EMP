@@ -10,6 +10,7 @@ enum EMPDataType {
     NONE,
     BOOL,
     ARRAY,
+    FLOAT,
 };
 
 struct EMPData

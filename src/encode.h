@@ -8,6 +8,8 @@
 
 std::vector<char> encode(EMPData data);
 
-std::tuple<std::vector<char>, int> int_to_vec(long numb, char size);
+std::vector<char> int_to_vec(long numb, char size);
+
+std::vector<char> float_to_vec(float numb);
 
 #endif

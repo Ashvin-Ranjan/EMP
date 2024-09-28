@@ -35,6 +35,13 @@ std::string to_string(EMPData data) {
             }
             out.pop_back();
             out += EMPConst::EMP_CLOSE_BRACE;
+            break;
+        }
+        case FLOAT:
+        {
+            float data_val = *(float*)data.data;
+            out = std::to_string(data_val) + EMPConst::EMP_FLOAT;
+            break;
         }
     }
 
