@@ -20,6 +20,18 @@ std::string to_string(EMPData data) {
             out = std::to_string(data_val) + EMPConst::EMP_SHORT;
             break;
         }
+        case INT_32:
+        {
+            int data_val = *(int*)data.data;
+            out = std::to_string(data_val);
+            break;
+        }
+        case INT_64:
+        {
+            long data_val = *(long*)data.data;
+            out = std::to_string(data_val) + EMPConst::EMP_LONG;
+            break;
+        }
         case BOOL:
         {
             bool data_val = *(bool*)data.data;
@@ -41,6 +53,17 @@ std::string to_string(EMPData data) {
         {
             float data_val = *(float*)data.data;
             out = std::to_string(data_val) + EMPConst::EMP_FLOAT;
+            break;
+        }
+        case STRING:
+        {
+            char* data_val = (char*)data.data;
+            out = '"';
+            while (*data_val != '\0') {
+                out += *data_val;
+                data_val++;
+            }
+            out += '"';
             break;
         }
     }

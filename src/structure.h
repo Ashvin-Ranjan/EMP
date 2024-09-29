@@ -7,10 +7,13 @@
 enum EMPDataType {
     INT_8,
     INT_16,
+    INT_32,
+    INT_64,
     NONE,
     BOOL,
     ARRAY,
     FLOAT,
+    STRING,
 };
 
 struct EMPData

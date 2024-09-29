@@ -17,15 +17,6 @@ std::vector<char> encode(EMPData data) {
             }
             break;
         }
-        case NONE:
-            out.push_back(EMPConst::NONE);
-            break;
-        case BOOL:
-        {
-            bool data_val = *(bool*)data.data;
-            out.push_back(EMPConst::BOOLEAN | (data_val*128U));
-            break;
-        }
         case INT_16: 
         {
             long data_val = (long)*(short*)data.data;
@@ -34,9 +25,44 @@ std::vector<char> encode(EMPData data) {
             std::vector<char> numb_data = int_to_vec(data_val, sizeof(short));
             out.push_back(EMPConst::INT_16 | (is_negative*128U) | (numb_data.back() << 4));
             numb_data.pop_back();
-            for (char byte : numb_data) {
-                out.push_back(byte);
+            out.insert(out.end(), numb_data.begin(), numb_data.end());
+            break;
+        }
+        case INT_32: 
+        {
+            long data_val = (long)*(int32_t*)data.data;
+            bool is_negative = data_val < 0;
+            data_val *= is_negative ? -1 : 1;
+            std::vector<char> numb_data = int_to_vec(data_val, sizeof(int32_t));
+            out.push_back(EMPConst::INT_32 | (is_negative*128U) | (numb_data.back() << 4));
+            numb_data.pop_back();
+            out.insert(out.end(), numb_data.begin(), numb_data.end());
+            break;
+        }
+        case INT_64: 
+        {
+            long data_val = (long)*(int64_t*)data.data;
+            bool is_negative = data_val < 0;
+            data_val *= is_negative ? -1 : 1;
+            std::vector<char> numb_data = int_to_vec(data_val, sizeof(int64_t));
+            char zeros = numb_data.back();
+            numb_data.pop_back();
+            out.insert(out.end(), numb_data.begin(), numb_data.end());
+            if (zeros == 8) {
+                out.push_back(EMPConst::INT_64 | (is_negative*128U) | 112);
+                out.push_back(0);
+            } else {
+                out.push_back(EMPConst::INT_64 | (is_negative*128U) | (zeros << 4));
             }
+            break;
+        }
+        case NONE:
+            out.push_back(EMPConst::NONE);
+            break;
+        case BOOL:
+        {
+            bool data_val = *(bool*)data.data;
+            out.push_back(EMPConst::BOOLEAN | (data_val*128U));
             break;
         }
         case ARRAY:
@@ -60,6 +86,25 @@ std::vector<char> encode(EMPData data) {
             out.push_back(EMPConst::FLOAT | byte_data.back());
             byte_data.pop_back();
             out.insert(out.end(), byte_data.begin(), byte_data.end());
+            break;
+        }
+        case STRING:
+        {
+            char* data_val = (char*)data.data;
+            std::vector<char> string_data;
+            while (*data_val != '\0') {
+                if (*data_val != EMPConst::STRING)
+                    string_data.push_back(*data_val);
+                data_val++;
+            }
+            if (string_data.size() < 16 && string_data.size() > 0) {
+                out.push_back(EMPConst::STRING | string_data.size() << 4);
+                out.insert(out.end(), string_data.begin(), string_data.end());
+            } else {
+                out.push_back(EMPConst::STRING);
+                out.insert(out.end(), string_data.begin(), string_data.end());
+                out.push_back(EMPConst::STRING);
+            }
             break;
         }
     }
@@ -89,10 +134,10 @@ std::vector<char> int_to_vec(long numb, char size) {
 std::vector<char> float_to_vec(float numb) {
     std::vector<char> out;
     long bit_data = *(long*)&numb; // Evil floating point bit level hacking
-    long exponent = (bit_data >> 23) & 0xff;
+    char exponent = (bit_data >> 23) & 0xff;
     long sign = bit_data >> 31;
     long mantissa = bit_data & 0x7fffff;
-    if (exponent < 0x10) {
+    if (exponent < 0x10 && exponent > 0) {
         long push_data = sign << 23 | mantissa;
         for (int i = 0; i < 3; i++) {
             out.push_back(push_data & 0xFF);
