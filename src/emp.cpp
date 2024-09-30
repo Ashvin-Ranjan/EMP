@@ -5,7 +5,8 @@
 #include "to_string.h"
 
 int main() {
-    EMPData byte = {NONE, NULL};
+    float f_val = 56334.34F;
+    EMPData byte = {FLOAT, &f_val};
     std::cout << "test\n";
     std::vector<char> data = encode(byte);
     std::printf("%s\n", to_string(byte).c_str());

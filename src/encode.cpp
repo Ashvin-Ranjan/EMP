@@ -133,18 +133,18 @@ std::vector<char> int_to_vec(long numb, char size) {
 // [Sign (1 bit)] [Exponent (8 bits)] [Mantissa (23 bits)]
 std::vector<char> float_to_vec(float numb) {
     std::vector<char> out;
-    long bit_data = *(long*)&numb; // Evil floating point bit level hacking
-    char exponent = (bit_data >> 23) & 0xff;
-    long sign = bit_data >> 31;
-    long mantissa = bit_data & 0x7fffff;
-    if (exponent < 0x10 && exponent > 0) {
+    u_int32_t bit_data = *(u_int32_t*)&numb; // Evil floating point bit level hacking
+    u_int8_t exponent = (bit_data >> 23) & 0xff;
+    bool sign = bit_data >> 31;
+    u_int32_t mantissa = bit_data & 0x7fffff;
+    if ((exponent & 0xf0) == exponent) {
         long push_data = sign << 23 | mantissa;
         for (int i = 0; i < 3; i++) {
             out.push_back(push_data & 0xFF);
             push_data >>= 8;
         }
         std::reverse(out.begin(), out.end());
-        out.push_back((char)exponent << 4);
+        out.push_back((char)exponent);
     } else {
         for (int i = 0; i < 4; i++) {
             out.push_back(bit_data & 0xFF);
