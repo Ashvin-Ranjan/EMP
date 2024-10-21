@@ -29,7 +29,6 @@ namespace EMPConst {
     const char EMP_NULL[5] = "null";
     const char EMP_FALSE[6] = "false";
     const char EMP_TRUE[5] = "true";
-    const char EMP_BIT = 'b';
     const char EMP_BYTE = 'B';
     const char EMP_LONG = 'l';
     const char EMP_SHORT = 's';
@@ -47,7 +46,7 @@ namespace EMPConst {
         EMP_CLOSE_BRACKET,
     };
     const char EMP_NUMB_SIGN[6] = {
-        EMP_BIT, EMP_BYTE, EMP_LONG, EMP_SHORT, EMP_FLOAT, EMP_DOUBLE,
+        EMP_BYTE, EMP_LONG, EMP_SHORT, EMP_FLOAT, EMP_DOUBLE
     };
 }
 

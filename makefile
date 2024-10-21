@@ -1,18 +1,17 @@
-# Makefiles make me cry
+CC := g++
+CFLAGS = -Wall -std=c++17 -ggdb
+SRC_DIR := ./src
+OBJ_DIR := ./obj
+OUT_DIR := ./bin
+SRC_FILES := $(wildcard $(SRC_DIR)/*.cpp)
+OBJ_FILES := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRC_FILES))
 
-# All is needed because for some reason it only runs the first one... why?
-all: encode.o emp.o display.o emp
+target: $(OBJ_FILES)
+	$(CC) $(CFLAGS) -o $(OUT_DIR)/emp $^
 
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	$(CC) $(CFLAGS) -c -o $@ $<
 
-encode.o: types\encode.cpp
-    g++ -c types\encode.cpp
-
-display.o: types\display.cpp
-    g++ -c types\display.cpp
-
-emp.o: emp.cpp
-    g++ -c emp.cpp
-
-
-emp: emp.o encode.o display.o
-	g++ -o emp emp.o encode.o display.o
+clean:
+	rm -r $(OUT_DIR)/*
+	rm -r $(OBJ_DIR)/*
